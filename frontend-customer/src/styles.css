@@ -1,0 +1,155 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #24312f;
+  background:
+    linear-gradient(90deg, rgba(31, 117, 101, 0.08), transparent 42%),
+    linear-gradient(180deg, #f9fbf8 0%, #eef4f1 100%);
+  min-height: 100vh;
+}
+
+.page {
+  width: min(960px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 42px;
+}
+
+.app-header {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(36, 49, 47, 0.1);
+}
+
+.app-header h1 {
+  margin: 0;
+  color: #143f39;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.form-shell {
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(36, 49, 47, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(36, 49, 47, 0.08);
+}
+
+.section-title {
+  margin: 4px 0 16px;
+  color: #143f39;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.section-title:not(:first-child) {
+  margin-top: 14px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(36, 49, 47, 0.08);
+}
+
+.form-shell .ant-form-item {
+  margin-bottom: 14px;
+}
+
+.form-shell .ant-form-item-label {
+  padding-bottom: 4px;
+}
+
+.form-shell .ant-form-item-label > label {
+  height: auto;
+  color: #405451;
+  font-weight: 600;
+}
+
+.form-shell .ant-input,
+.form-shell .ant-input-number,
+.form-shell .ant-picker {
+  border-radius: 6px;
+}
+
+.requirements-item {
+  margin-bottom: 8px;
+}
+
+.requirements-item .ant-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.requirements-item .ant-checkbox-wrapper {
+  margin-inline-start: 0;
+}
+
+.grid {
+  display: grid;
+  gap: 0 16px;
+}
+
+.grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.detail-panel {
+  padding: 16px 16px 2px;
+  background: #f7faf8;
+  border: 1px solid rgba(31, 117, 101, 0.14);
+  border-radius: 8px;
+}
+
+.detail-panel h3 {
+  margin: 0 0 12px;
+  color: #1f7565;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.full {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 4px;
+}
+
+@media (max-width: 760px) {
+  .page {
+    width: min(100% - 20px, 720px);
+    padding: 20px 0 32px;
+  }
+
+  .form-shell {
+    padding: 20px;
+  }
+
+  .grid.two,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions .ant-btn {
+    width: 100%;
+  }
+}

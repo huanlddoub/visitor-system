@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Backend
+backend/.env
+backend/*.db
+
+# Frontend
+frontend-*/node_modules/
+frontend-*/dist/
+frontend-*/.npm-cache/
+
+# General
+.npm-cache/
+.DS_Store
+Thumbs.db
+*.log
+vite.err.log
+vite.out.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+desktop.ini

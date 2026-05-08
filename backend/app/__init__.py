@@ -1,0 +1,1 @@
+"""Visitor reception backend package."""

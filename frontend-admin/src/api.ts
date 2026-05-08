@@ -1,8 +1,10 @@
 import type {
   AgentSuggestionResponse,
+  DailyReportResponse,
   DashboardSummary,
   Task,
   TaskStatus,
+  TrackAlertResponse,
   User,
   Visitor
 } from "./types";
@@ -46,5 +48,9 @@ export const api = {
     request<Task>(`/api/tasks/${taskId}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status, remark })
-    })
+    }),
+  trackAlerts: () =>
+    request<TrackAlertResponse>("/api/agent/track-alerts", { method: "POST" }),
+  dailyReport: (date?: string) =>
+    request<DailyReportResponse>(`/api/agent/daily-report${date ? `?date=${date}` : ""}`, { method: "POST" })
 };

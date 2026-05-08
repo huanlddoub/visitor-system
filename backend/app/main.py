@@ -8,10 +8,13 @@ from app.models import RequirementType, TaskStatus, User, UserRole, VisitorStatu
 from app.schemas import (
     AgentSuggestionRequest,
     AgentSuggestionResponse,
+    AlertItem,
     AssignTasksRequest,
+    DailyReportResponse,
     DashboardSummary,
     TaskOut,
     TaskStatusUpdate,
+    TrackAlertResponse,
     UserOut,
     VisitorCreate,
     VisitorOut,
@@ -166,3 +169,17 @@ def agent_assign_suggest(
         return WorkBuddyClient(settings).suggest_assignment(db, payload.visitor_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/api/agent/track-alerts", response_model=TrackAlertResponse)
+def agent_track_alerts(db: Session = Depends(get_db)) -> TrackAlertResponse:
+    """Agent 3: 进度跟踪 — 扫描超时/异常任务并生成告警。"""
+    return WorkBuddyClient(settings).track_alerts(db)
+
+
+@app.post("/api/agent/daily-report", response_model=DailyReportResponse)
+def agent_daily_report(
+    date: str | None = None, db: Session = Depends(get_db)
+) -> DailyReportResponse:
+    """Agent 4: 日报汇报 — 生成接待日报和数据洞察。"""
+    return WorkBuddyClient(settings).daily_report(db, date)

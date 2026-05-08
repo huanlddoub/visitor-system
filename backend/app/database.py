@@ -14,10 +14,17 @@ class Settings(BaseSettings):
         "visitor_system?charset=utf8mb4"
     )
     cors_origins: str = "http://localhost:5173,http://localhost:5174"
+
+    # --- WorkBuddy 多 Agent 配置 ---
     workbuddy_base_url: str | None = None
     workbuddy_api_key: str | None = None
-    workbuddy_assign_agent_id: str | None = None
-    workbuddy_timeout_seconds: int = 12
+    workbuddy_timeout_seconds: int = 15
+
+    # 4 个 Agent ID（在 WorkBuddy 平台创建后填入）
+    workbuddy_collect_agent_id: str | None = None      # 信息收集 Agent
+    workbuddy_assign_agent_id: str | None = None       # 智能分配 Agent
+    workbuddy_track_agent_id: str | None = None        # 进度跟踪 Agent
+    workbuddy_report_agent_id: str | None = None       # 汇报总结 Agent
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

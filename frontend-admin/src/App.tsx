@@ -27,9 +27,13 @@ import { api } from "./api";
 import { statusColor, statusLabel, taskTypeLabel } from "./labels";
 import type {
   AgentSuggestionItem,
+  AgentStatus,
+  AlertItem as AlertItemType,
   DashboardSummary,
+  DailyReportResponse,
   Task,
   TaskStatus,
+  TrackAlertResponse,
   User,
   Visitor
 } from "./types";
@@ -238,6 +242,11 @@ function Shell() {
                 </span>
               ),
               children: <MyTasks staff={staff} />
+            },
+            {
+              key: "agents",
+              label: <span>Agent 协同</span>,
+              children: <AgentPanel />
             }
           ]}
         />
@@ -522,5 +531,171 @@ function MyTasks({ staff }: { staff: User[] }) {
         />
       )}
     </Card>
+  );
+}
+
+// ─── Agent 协同面板 ─────────────────────────────
+
+function AgentPanel() {
+  const [agents, setAgents] = useState<AgentStatus[]>([
+    { name: "collect", label: "信息收集 Agent", status: "idle" },
+    { name: "assign", label: "智能分配 Agent", status: "idle" },
+    { name: "track", label: "进度跟踪 Agent", status: "idle" },
+    { name: "report", label: "汇报总结 Agent", status: "idle" },
+  ]);
+  const [trackResult, setTrackResult] = useState<TrackAlertResponse | null>(null);
+  const [reportResult, setReportResult] = useState<DailyReportResponse | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const { message } = AntApp.useApp();
+
+  function updateAgent(name: string, patch: Partial<AgentStatus>) {
+    setAgents((prev) =>
+      prev.map((a) => (a.name === name ? { ...a, ...patch } : a))
+    );
+  }
+
+  async function runTrack() {
+    setLoading("track");
+    updateAgent("track", { status: "running" });
+    try {
+      const data = await api.trackAlerts();
+      setTrackResult(data);
+      updateAgent("track", { status: "done", lastResult: data.summary });
+      message.success(data.summary);
+    } catch {
+      updateAgent("track", { status: "error" });
+      message.error("进度跟踪失败");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function runReport() {
+    setLoading("report");
+    updateAgent("report", { status: "running" });
+    try {
+      const data = await api.dailyReport();
+      setReportResult(data);
+      updateAgent("report", { status: "done", lastResult: `日报已生成 (${data.date})` });
+      message.success("日报已生成");
+    } catch {
+      updateAgent("report", { status: "error" });
+      message.error("日报生成失败");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  const statusColorMap: Record<string, string> = {
+    idle: "default",
+    running: "processing",
+    done: "success",
+    error: "error",
+  };
+
+  const statusTextMap: Record<string, string> = {
+    idle: "空闲",
+    running: "运行中",
+    done: "已完成",
+    error: "异常",
+  };
+
+  const alertTypeColor: Record<string, string> = {
+    exception: "red",
+    timeout: "orange",
+    pending_too_long: "blue",
+    info: "green",
+  };
+
+  return (
+    <Space direction="vertical" className="full-width" size="large">
+      <Card title="Agent 运行状态">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {agents.map((agent) => (
+            <Card key={agent.name} size="small">
+              <Space>
+                <Badge status={statusColorMap[agent.status] as any} />
+                <Text strong>{agent.label}</Text>
+                <Tag
+                  color={
+                    statusColorMap[agent.status] === "processing"
+                      ? "blue"
+                      : statusColorMap[agent.status] === "success"
+                        ? "green"
+                        : statusColorMap[agent.status] === "error"
+                          ? "red"
+                          : undefined
+                  }
+                >
+                  {statusTextMap[agent.status]}
+                </Tag>
+              </Space>
+              {agent.lastResult && (
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary" style={{ fontSize: 12 }}>{agent.lastResult}</Text>
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="Agent 操作">
+        <Space wrap>
+          <Button loading={loading === "track"} onClick={runTrack}>
+            进度跟踪 Agent：扫描告警
+          </Button>
+          <Button loading={loading === "report"} onClick={runReport}>
+            汇报总结 Agent：生成日报
+          </Button>
+        </Space>
+      </Card>
+
+      {trackResult && (
+        <Card title={`进度跟踪结果 — ${trackResult.agent_name}`}>
+          <Alert type="info" message={trackResult.summary} style={{ marginBottom: 16 }} />
+          {trackResult.alerts.length > 0 ? (
+            <List
+              dataSource={trackResult.alerts}
+              renderItem={(item: AlertItemType) => (
+                <List.Item>
+                  <List.Item.Meta
+                    title={
+                      <Space>
+                        <Tag color={alertTypeColor[item.alert_type] || "blue"}>
+                          {item.alert_type}
+                        </Tag>
+                        任务 #{item.task_id} — {taskTypeLabel[item.task_type]}
+                      </Space>
+                    }
+                    description={`${item.visitor_name} | 负责人：${item.assignee_name}`}
+                  />
+                  <Text type="warning">{item.message}</Text>
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Empty description="暂无告警，一切正常" />
+          )}
+        </Card>
+      )}
+
+      {reportResult && (
+        <Card title={`接待日报 — ${reportResult.agent_name}`}>
+          <pre
+            style={{
+              whiteSpace: "pre-wrap",
+              fontSize: 13,
+              lineHeight: 1.8,
+              background: "#f5f5f5",
+              padding: 16,
+              borderRadius: 8,
+            }}
+          >
+            {reportResult.report}
+          </pre>
+        </Card>
+      )}
+    </Space>
   );
 }

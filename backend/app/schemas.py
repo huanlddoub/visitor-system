@@ -130,3 +130,31 @@ class AgentSuggestionResponse(BaseModel):
     suggestions: list[AgentSuggestionItem]
     summary: str
     raw: dict[str, Any] | None = None
+
+
+# ─── 进度跟踪 Agent ─────────────────────────────
+
+class AlertItem(BaseModel):
+    task_id: int
+    task_type: RequirementType
+    visitor_name: str
+    assignee_name: str
+    alert_type: str  # "timeout" | "exception" | "pending_too_long" | "info"
+    message: str
+
+
+class TrackAlertResponse(BaseModel):
+    agent_name: str
+    alerts: list[AlertItem]
+    summary: str
+    raw: dict[str, Any] | None = None
+
+
+# ─── 日报汇报 Agent ─────────────────────────────
+
+class DailyReportResponse(BaseModel):
+    agent_name: str
+    date: str
+    report: str
+    summary_data: dict[str, Any]
+    raw: dict[str, Any] | None = None

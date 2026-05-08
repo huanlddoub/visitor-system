@@ -82,3 +82,34 @@ export interface AgentSuggestionResponse {
   summary: string;
   raw?: Record<string, unknown>;
 }
+
+// ─── Agent 协同 ─────────────────────────────
+
+export interface AlertItem {
+  task_id: number;
+  task_type: RequirementType;
+  visitor_name: string;
+  assignee_name: string;
+  alert_type: "timeout" | "exception" | "pending_too_long" | "info";
+  message: string;
+}
+
+export interface TrackAlertResponse {
+  agent_name: string;
+  alerts: AlertItem[];
+  summary: string;
+}
+
+export interface DailyReportResponse {
+  agent_name: string;
+  date: string;
+  report: string;
+  summary_data: DashboardSummary;
+}
+
+export interface AgentStatus {
+  name: string;
+  label: string;
+  status: "idle" | "running" | "done" | "error";
+  lastResult?: string;
+}

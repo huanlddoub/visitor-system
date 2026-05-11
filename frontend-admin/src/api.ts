@@ -9,10 +9,8 @@ import type {
   Visitor
 } from "./types";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const resp = await fetch(`${API_BASE}${path}`, {
+  const resp = await fetch(path, {
     ...init,
     headers: {
       "Content-Type": "application/json",

@@ -327,8 +327,33 @@ function AssignModal({
 
   useEffect(() => {
     form.resetFields();
-    setSuggestions([]);
-  }, [visitor?.id]);
+    if (!visitor) {
+      setSuggestions([]);
+      return;
+    }
+
+    const storedSuggestions = visitor.tasks
+      .map((task) =>
+        task.agent_suggestion?.suggested_assignee_id
+          ? {
+              ...task.agent_suggestion,
+              task_id: task.id,
+              task_type: task.task_type
+            }
+          : null
+      )
+      .filter((item): item is AgentSuggestionItem => Boolean(item));
+
+    setSuggestions(storedSuggestions);
+    form.setFieldsValue(
+      Object.fromEntries(
+        storedSuggestions.map((item) => [
+          `task_${item.task_id}`,
+          item.suggested_assignee_id
+        ])
+      )
+    );
+  }, [form, visitor]);
 
   async function suggest() {
     if (!visitor) return;

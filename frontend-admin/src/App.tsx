@@ -158,12 +158,9 @@ function Shell() {
   return (
     <Layout className="app-shell">
       <Header className="topbar">
-        <div>
-          <Text className="eyebrow">Reception Command</Text>
-          <Title level={3}>客户接待管理台</Title>
-        </div>
+        <Title level={4} className="topbar-title">客户接待管理台</Title>
         <Space>
-          <Badge status="processing" text="WorkBuddy Agent Ready" />
+          <Badge status="processing" text="智能助手在线" />
           <Button onClick={() => refresh()}>刷新</Button>
         </Space>
       </Header>
@@ -196,11 +193,6 @@ function Shell() {
                       <Progress type="circle" percent={completion} />
                     </Space>
                   </Card>
-                  <div className="quick-grid">
-                    <Card>客户需求集中管理</Card>
-                    <Card>Agent 推荐接待人员</Card>
-                    <Card>接待人员实时更新状态</Card>
-                  </div>
                 </>
               )
             },
@@ -397,7 +389,7 @@ function AssignModal({
           <Alert
             type="info"
             showIcon
-            message="可先调用 WorkBuddy Agent 生成推荐，再由管理员确认生效。"
+            message="可先生成智能分配建议，再由管理员确认生效。"
           />
           <Button loading={loading} onClick={suggest}>
             Agent 推荐分配

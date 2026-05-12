@@ -1,6 +1,7 @@
 import type { RequirementType, TaskStatus } from "./types";
 
 export const taskTypeLabel: Record<RequirementType, string> = {
+  general: "基础接待",
   pickup: "接站",
   dropoff: "送站",
   hotel: "住宿",

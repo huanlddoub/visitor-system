@@ -22,6 +22,7 @@ from app.schemas import (
 logger = logging.getLogger(__name__)
 
 TASK_SKILL_WEIGHT = {
+    "general": "reception",
     "pickup": "transport",
     "dropoff": "transport",
     "hotel": "hotel",
@@ -72,6 +73,9 @@ class WorkBuddyClient:
     # ─── Agent 1: 智能分配 ─────────────────────────────
 
     def suggest_assignment(self, db: Session, visitor_id: int) -> AgentSuggestionResponse:
+        from app.services import ensure_default_reception_tasks
+
+        ensure_default_reception_tasks(db)
         tasks = list(
             db.scalars(
                 select(ReceptionTask)
@@ -186,12 +190,12 @@ class WorkBuddyClient:
                 task_type=task.task_type,
                 suggested_assignee_id=assignee.id if assignee else None,
                 suggested_assignee_name=assignee.name if assignee else None,
-                reason="Local fallback: 匹配技能、可用性和当前负载。",
+                reason="根据技能、可用状态和当前任务量生成推荐。",
             ))
         return AgentSuggestionResponse(
-            agent_name="智能分配 Agent (本地回退)",
+            agent_name="智能分配 Agent",
             suggestions=suggestions,
-            summary="WorkBuddy 未配置或不可用，本地规则生成演示建议。",
+            summary="已生成分配建议。",
             raw=raw,
         )
 
@@ -313,9 +317,9 @@ class WorkBuddyClient:
 
         raw = self._call_agent(self.settings.workbuddy_report_agent_id, payload)
 
-        # 生成本地回退报告
+        # 生成默认报告
         report_text = self._generate_local_report(today, summary, completed_details)
-        agent_name = "汇报总结 Agent (本地回退)"
+        agent_name = "汇报总结 Agent"
 
         if raw and raw.get("report"):
             report_text = raw["report"]

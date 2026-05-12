@@ -16,12 +16,14 @@ import type { RequirementCreate, RequirementType, VisitorCreate, VisitorOut } fr
 
 const { Title } = Typography;
 
+type SelectableRequirementType = Exclude<RequirementType, "general">;
+
 const requirementOptions = [
   { label: "接站", value: "pickup" },
   { label: "送站", value: "dropoff" },
   { label: "住宿", value: "hotel" },
   { label: "用餐", value: "meal" }
-];
+] satisfies { label: string; value: SelectableRequirementType }[];
 
 type FormValues = {
   name: string;
@@ -30,7 +32,7 @@ type FormValues = {
   visit_time: dayjs.Dayjs;
   people_count: number;
   remark?: string;
-  requirementTypes: RequirementType[];
+  requirementTypes: SelectableRequirementType[];
   pickup?: Record<string, unknown>;
   dropoff?: Record<string, unknown>;
   hotel?: Record<string, unknown>;
@@ -48,7 +50,7 @@ function buildRequirements(values: FormValues): RequirementCreate[] {
 
 export default function App() {
   const [form] = Form.useForm<FormValues>();
-  const [selected, setSelected] = useState<RequirementType[]>([]);
+  const [selected, setSelected] = useState<SelectableRequirementType[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<VisitorOut | null>(null);
 
@@ -135,7 +137,7 @@ export default function App() {
           <Form.Item name="requirementTypes" className="requirements-item">
             <Checkbox.Group
               options={requirementOptions}
-              onChange={(values: CheckboxValue[]) => setSelected(values as RequirementType[])}
+              onChange={(values: CheckboxValue[]) => setSelected(values as SelectableRequirementType[])}
             />
           </Form.Item>
 

@@ -13,6 +13,10 @@ from app.models import (
 )
 from app.schemas import DashboardSummary, VisitorCreate
 
+DEFAULT_REQUIREMENT_DETAIL = {
+    "说明": "未选择具体接待需求，系统生成基础接待任务",
+}
+
 
 def sync_visitor_status(db: Session, visitor_id: int) -> None:
     tasks = db.scalars(
@@ -35,6 +39,36 @@ def sync_visitor_status(db: Session, visitor_id: int) -> None:
         visitor.status = VisitorStatus.assigned
 
 
+def _add_default_reception_task(db: Session, visitor: Visitor) -> None:
+    requirement = VisitorRequirement(
+        visitor_id=visitor.id,
+        type=RequirementType.general,
+        detail=DEFAULT_REQUIREMENT_DETAIL,
+    )
+    db.add(requirement)
+    db.flush()
+    db.add(
+        ReceptionTask(
+            visitor_id=visitor.id,
+            requirement_id=requirement.id,
+            task_type=RequirementType.general,
+            deadline=visitor.visit_time,
+        )
+    )
+
+
+def ensure_default_reception_tasks(db: Session) -> None:
+    visitors = db.scalars(
+        select(Visitor).where(~Visitor.requirements.any(), ~Visitor.tasks.any())
+    ).all()
+    if not visitors:
+        return
+
+    for visitor in visitors:
+        _add_default_reception_task(db, visitor)
+    db.commit()
+
+
 def create_visitor(db: Session, payload: VisitorCreate) -> Visitor:
     visitor = Visitor(
         name=payload.name,
@@ -46,6 +80,9 @@ def create_visitor(db: Session, payload: VisitorCreate) -> Visitor:
     )
     db.add(visitor)
     db.flush()
+
+    if not payload.requirements:
+        _add_default_reception_task(db, visitor)
 
     for item in payload.requirements:
         requirement = VisitorRequirement(
@@ -69,6 +106,7 @@ def create_visitor(db: Session, payload: VisitorCreate) -> Visitor:
 
 
 def get_visitor(db: Session, visitor_id: int) -> Visitor:
+    ensure_default_reception_tasks(db)
     visitor = db.execute(
         select(Visitor)
         .options(
@@ -85,6 +123,7 @@ def get_visitor(db: Session, visitor_id: int) -> Visitor:
 def list_visitors(
     db: Session, status: VisitorStatus | None = None, keyword: str | None = None
 ) -> list[Visitor]:
+    ensure_default_reception_tasks(db)
     stmt = select(Visitor).options(
         joinedload(Visitor.requirements),
         joinedload(Visitor.tasks).joinedload(ReceptionTask.assignee),

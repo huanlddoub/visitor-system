@@ -1,5 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.agent.workbuddy import WorkBuddyClient
@@ -45,7 +46,28 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_schema_compatibility()
     seed_demo_staff()
+
+
+def ensure_schema_compatibility() -> None:
+    if engine.dialect.name not in {"mysql", "mariadb"}:
+        return
+
+    requirement_types = "'general','pickup','dropoff','hotel','meal'"
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "ALTER TABLE visitor_requirements "
+                f"MODIFY type ENUM({requirement_types}) NOT NULL"
+            )
+        )
+        connection.execute(
+            text(
+                "ALTER TABLE reception_tasks "
+                f"MODIFY task_type ENUM({requirement_types}) NOT NULL"
+            )
+        )
 
 
 def seed_demo_staff() -> None:
@@ -60,7 +82,7 @@ def seed_demo_staff() -> None:
                     phone="13800000001",
                     role=UserRole.receptionist,
                     department="综合接待",
-                    skills={"transport": True, "pickup": True, "dropoff": True},
+                    skills={"reception": True, "transport": True, "pickup": True, "dropoff": True},
                     available_status="available",
                 ),
                 User(

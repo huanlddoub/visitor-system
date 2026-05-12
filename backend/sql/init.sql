@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS visitors (
 CREATE TABLE IF NOT EXISTS visitor_requirements (
   id INT PRIMARY KEY AUTO_INCREMENT,
   visitor_id INT NOT NULL,
-  type ENUM('pickup', 'dropoff', 'hotel', 'meal') NOT NULL,
+  type ENUM('general', 'pickup', 'dropoff', 'hotel', 'meal') NOT NULL,
   detail JSON NOT NULL,
   status ENUM('pending_assignment', 'assigned', 'in_progress', 'completed', 'exception')
     NOT NULL DEFAULT 'pending_assignment',
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS reception_tasks (
   id INT PRIMARY KEY AUTO_INCREMENT,
   visitor_id INT NOT NULL,
   requirement_id INT NOT NULL UNIQUE,
-  task_type ENUM('pickup', 'dropoff', 'hotel', 'meal') NOT NULL,
+  task_type ENUM('general', 'pickup', 'dropoff', 'hotel', 'meal') NOT NULL,
   assignee_id INT,
   status ENUM('pending_assignment', 'assigned', 'in_progress', 'completed', 'exception')
     NOT NULL DEFAULT 'pending_assignment',
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS agent_logs (
 
 INSERT INTO users (id, name, phone, role, department, skills, available_status)
 VALUES
-  (1, '张敏', '13800000001', 'receptionist', '综合接待', JSON_OBJECT('transport', true, 'pickup', true, 'dropoff', true), 'available'),
+  (1, '张敏', '13800000001', 'receptionist', '综合接待', JSON_OBJECT('reception', true, 'transport', true, 'pickup', true, 'dropoff', true), 'available'),
   (2, '李航', '13800000002', 'receptionist', '行政保障', JSON_OBJECT('hotel', true, 'meal', true), 'available'),
   (3, '王悦', '13800000003', 'receptionist', '会务服务', JSON_OBJECT('meal', true, 'transport', true), 'busy')
 ON DUPLICATE KEY UPDATE

@@ -1,4 +1,4 @@
-export type RequirementType = "pickup" | "dropoff" | "hotel" | "meal";
+export type RequirementType = "general" | "pickup" | "dropoff" | "hotel" | "meal";
 
 export interface RequirementCreate {
   type: RequirementType;

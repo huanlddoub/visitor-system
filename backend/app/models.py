@@ -21,6 +21,7 @@ class VisitorStatus(str, enum.Enum):
 
 
 class RequirementType(str, enum.Enum):
+    general = "general"
     pickup = "pickup"
     dropoff = "dropoff"
     hotel = "hotel"
